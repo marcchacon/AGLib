@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AGLib Test</title>
+    <style>
+        body { font-family: sans-serif; }
+        table { margin: 20px 0; }
+        td { width: 36px; height: 36px; text-align: center; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <h1>AGLib Basic Test</h1>
+    <div id="board-container"></div>
+    <script src="aglib.js"></script>
+    <script>
+        // Create a board with some irregular positions
+        const board = new AGLib.Board();
+        // Add some BoardPieces at arbitrary positions
+        board.addBoardPiece(new AGLib.BoardPiece({ id: 'A', style: new AGLib.Style({ color: '#aaa', shape: 1 }) }), [0,0]);
+        board.addBoardPiece(new AGLib.BoardPiece({ id: 'B', style: new AGLib.Style({ color: '#aaa', shape: 1 }) }), [1,0]);
+        board.addBoardPiece(new AGLib.BoardPiece({ id: 'C', style: new AGLib.Style({ color: '#aaa', shape: 1 }) }), [0,1]);
+        board.addBoardPiece(new AGLib.BoardPiece({ id: 'D', style: new AGLib.Style({ color: '#aaa', shape: 1 }) }), [2,2]); // isolated
+
+        // Add some pieces
+        board.addPiece(new AGLib.Piece({ id: 'p1', player: 'X', style: new AGLib.Style({ color: 'red', shape: 0 }) }), [0,0]);
+        board.addPiece(new AGLib.Piece({ id: 'p2', player: 'O', style: new AGLib.Style({ color: 'blue', shape: 0 }) }), [2,2]);
+
+        // Render the board using the library's toHTML()
+        const container = document.getElementById('board-container');
+        container.appendChild(board.toHTML());
+    </script>
+</body>
+</html>
