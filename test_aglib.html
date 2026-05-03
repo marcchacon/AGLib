@@ -28,7 +28,7 @@
 
         // Render the board using the library's toHTML()
         const container = document.getElementById('board-container');
-        container.appendChild(board.toHTML());
+        container.replaceChildren(board.toHTML());
     </script>
 </body>
 </html>
