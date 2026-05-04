@@ -17,7 +17,7 @@ class Style {
      * @example
      * new Style({ color: 'red', shape: 0, size: 32 }) // Red circle of size 32px
      */
-    constructor({ color = '#aaa', shape = 1, size = 32 } = {}) {
+    constructor({ color = '#bbb', shape = 1, size = 100 } = {}) {
         this._color = color;
         this._shape = shape;
         this._size = size;
@@ -33,6 +33,50 @@ class Style {
         el.style.display = 'inline-block';
         el.style.borderRadius = this._shape === 0 ? '50%' : '0';
         return el;
+    }
+    
+}
+
+/**
+ * PieceStyle: Extends Style to create more complex shapes using CSS clip-path.
+ * The shape parameter can specify the number of sides for a polygon
+ * The toHTML method generates a div with a clip-path that creates the desired polygon shape.
+ * This allows for more visually distinct pieces without needing image assets.
+ * @example
+ * new PieceStyle({ color: 'blue', shape: 3, size: 32 }) // Blue triangle of size 32px
+ */
+class PieceStyle extends Style {
+    constructor({ color = 'red', shape = 1, size = 90 } = {}) {
+        super({ color, shape, size });
+    }
+
+    toHTML() {
+        const el = document.createElement('div');
+        el.style.width = el.style.height = this._size + 'px';
+        el.style.background = this._color;
+        el.style.display = 'inline-block';
+        el.style.clipPath = this._polygonPoints(this._shape, this._size);
+        return el;
+    }
+
+    _polygonPoints(sides, size) {
+        const cx = size / 2;
+        const cy = size / 2;
+        const r = size / 2;
+
+        let points = [];
+        if (sides < 3) {
+            // Default to circle if shape is 0 or invalid
+            return 'circle(50%)';
+        }
+        for (let i = 0; i < sides; i++) {
+            const angle = (i / sides) * 2 * Math.PI - Math.PI / 2;
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            points.push(`${x}px ${y}px`);
+        }
+
+        return `polygon(${points.join(',')})`;
     }
 }
 /**
@@ -109,17 +153,31 @@ class BoardPiece {
      * @returns {boolean} - True if the board piece is empty, false otherwise.
      */
     isEmpty() {
-        return this.piece === null;
+        return this._piece === null;
     }
+
+    /**
+     * Removes the piece from the board piece, leaving it empty. 
+     * @returns {boolean} true if the piece was removed, false if there was no piece to remove.
+     */
     removePiece() {
-        this.piece = null;
+        if (this._piece === null) return false;
+        this._piece = null;
         return true;
     }
 
+    /**
+     * Creates an HTML representation of the board piece. 
+     * If the board piece contains a piece, it will render that piece's HTML inside the board piece's HTML element. 
+     * @returns {HTMLDivElement} a BoardPiece div element
+     */
     toHTML() {
-        const el = this.style.toHTML();
-        el.setAttribute('data-boardpiece-id', this.id);
-        if (this.piece) el.appendChild(this.piece.toHTML());
+        const el = this._style.toHTML();
+        el.setAttribute('data-boardpiece-id', this._id);
+        el.style.display = 'flex';
+        el.style.justifyContent = 'center';
+        el.style.alignItems = 'center';
+        if (this._piece) el.appendChild(this._piece.toHTML());
         return el;
     }
 }
@@ -137,18 +195,18 @@ class Board {
      * @param {Array<Array<BoardPiece|null|any>>} matrix Optional 2D array to initialize the board with specific BoardPieces or placeholders (non-null, non-BoardPiece values will be converted to default BoardPieces) 
      * @param {Style} style default style for any auto-created BoardPieces )
      */
-    constructor({x = 0, y = 0, matrix = null, style = null} = {}) {
+    constructor({ x = 0, y = 0, matrix = null, style = null } = {}) {
         if (matrix) {
             this._board = new Map();
             for (let i = 0; i < matrix.length; i++) {
                 for (let j = 0; j < matrix[i].length; j++) {
                     const bp = matrix[i][j];
                     if (bp instanceof BoardPiece) {
-                        const pos = [j,i];
+                        const pos = [j, i];
                         this._board.set(this._posKey(pos), bp);
                     } else if (bp) {
-                        const pos = [j,i];
-                        this._board.set(this._posKey(pos), new BoardPiece({ id: 'bp_' + this._board.size, style:  style || new Style() }));
+                        const pos = [j, i];
+                        this._board.set(this._posKey(pos), new BoardPiece({ id: 'bp_' + this._board.size, style: style || new Style() }));
                     }
                 }
             }
@@ -210,7 +268,7 @@ class Board {
         if (!this.removeBoardPiece(oldKey)) {
             return false;
         }
-        
+
         if (!this.addBoardPiece(bp, newPos)) {
             // rollback
             this.addBoardPiece(bp, oldPos);
@@ -240,7 +298,7 @@ class Board {
         }
         return pieces;
     }
-    
+
     /**
      * Adds a piece to the board at the specified position. The position must already have a BoardPiece.
      * @param {Piece} piece the piece to add.
@@ -287,7 +345,7 @@ class Board {
             }
             createdDestBP = true;
         }
-       
+
         if (!destBp.addPiece(piece)) {
             // rollback
             bp.addPiece(piece);
@@ -379,7 +437,7 @@ class Board {
             const tr = document.createElement('tr');
             for (const bp of row) {
                 const td = document.createElement('td');
-                td.style.padding = '0';
+                td.style.padding = '2px';
                 if (bp) {
                     td.appendChild(bp.toHTML());
                 } else {
@@ -410,4 +468,4 @@ class Game {
 }
 
 // Expose globally
-window.AGLib = { Game, Board, BoardPiece, Piece, Style };
+window.AGLib = { Game, Board, BoardPiece, Piece, Style, PieceStyle };
