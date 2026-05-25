@@ -77,7 +77,7 @@ class PieceRenderer extends Renderer {
 
         this.clickable = this._clickable;
         this.draggable = this._draggable;
-        
+
         this.refresh();
 
         return this._el;
@@ -96,7 +96,7 @@ class PieceRenderer extends Renderer {
         this._clickable = value;
 
         if (!this._el) return;
-        
+
         this._el.removeEventListener('click', this._onClick);
         this._el.style.cursor = 'default';
 
@@ -116,7 +116,7 @@ class PieceRenderer extends Renderer {
         this._draggable = value;
 
         if (!this._el) return;
-        
+
         this._el.removeEventListener('dragstart', this._onDragStart);
         this._el.removeEventListener('dragend', this._onDragEnd);
         this._el.draggable = false;
@@ -262,7 +262,7 @@ class BoardPieceRenderer extends Renderer {
     }
 
     _replaceChild() {
-    
+
         if (!this._el) return;
 
         const currentChild = this._el.firstElementChild;
@@ -298,7 +298,7 @@ class BoardPieceRenderer extends Renderer {
             this._el.style.cursor = 'grab';
         }
     }
-    
+
     get clickable() {
         return this._clickable;
     }
@@ -317,7 +317,7 @@ class BoardPieceRenderer extends Renderer {
             this._el.addEventListener('drop', this._onDrop);
         }
     }
-    
+
     get droppable() {
         return this._droppable;
     }
@@ -326,10 +326,10 @@ class BoardPieceRenderer extends Renderer {
         this._draggable = value;
 
         if (!this._el) return;
-        
+
         this._el.removeEventListener('dragstart', this._onDragStart);
         this._el.removeEventListener('dragend', this._onDragEnd);
-        
+
         this._el.style.cursor = 'default';
         this._el.draggable = false;
 
@@ -341,7 +341,7 @@ class BoardPieceRenderer extends Renderer {
             this._el.style.cursor = 'grab';
         }
     }
-    
+
     get draggable() {
         return this._draggable;
     }
@@ -432,7 +432,7 @@ class BoardRenderer extends Renderer {
         border = 1,
         gap = 6,
         background = 'white',
-        cellStyle = new BasicStyle({ color: 'transparent', size: 100 }) 
+        cellStyle = new BasicStyle({ color: 'transparent', size: 100 })
     } = {}) {
 
         super(board);
@@ -440,14 +440,14 @@ class BoardRenderer extends Renderer {
         this.border = border;
         this.gap = gap;
         this.background = background;
-        
+
         if (!(cellStyle instanceof Style)) {
             //throw new Error('cellStyle must be a Style instance (BasicStyle, PolygonStyle, etc.)');
-            new BasicStyle({ color: 'transparent', size: 100 }) 
+            new BasicStyle({ color: 'transparent', size: 100 })
         } else {
             this.cellStyle = cellStyle;
         }
-        
+
         this._cells = [];
     }
 
@@ -551,10 +551,26 @@ class BoardRenderer extends Renderer {
         cell.style.height = `${cellSize}px`;
 
         this.cellStyle.applyTo(cell);
-        
+
         cell.style.display = 'flex';
         cell.style.alignItems = 'center';
         cell.style.justifyContent = 'center';
+
+        cell._handlers = {
+            click: (ev) => {
+                this._handleCellClick(cell, ev);
+            },
+            drop: (ev) => {
+                ev.preventDefault();
+                this._handleCellDrop(cell, ev);
+            },
+            dragover: (ev) => {
+                ev.preventDefault();
+                this._handleCellDragover(cell, ev);
+            }
+        };
+
+        this._enableCellEvents(cell);
 
         return cell;
     }
@@ -591,10 +607,61 @@ class BoardRenderer extends Renderer {
 
         if (currentChild && currentChild !== desiredChild) {
             cell.removeChild(currentChild);
+            this._enableCellEvents(cell);
         }
 
         if (desiredChild) {
             cell.appendChild(desiredChild);
+            this._disableCellEvents(cell);
         }
+    }
+
+    _enableCellEvents(cell) {
+        if (cell._eventsEnabled) return;
+
+        cell.addEventListener('click', cell._handlers.click);
+        cell.addEventListener('drop', cell._handlers.drop);
+        cell.addEventListener('dragover', cell._handlers.dragover);
+
+        cell._eventsEnabled = true;
+    }
+
+    _disableCellEvents(cell) {
+        if (!cell._eventsEnabled) return;
+
+        cell.removeEventListener('click', cell._handlers.click);
+        cell.removeEventListener('drop', cell._handlers.drop);
+        cell.removeEventListener('dragover', cell._handlers.dragover);
+
+        cell._eventsEnabled = false;
+    }
+
+    _handleCellClick(cell, e) {
+        e.currentTarget.dispatchEvent(
+            new CustomEvent('emptyspaceclick', {
+                detail: {
+                    cell: cell,
+                    timestamp: Date.now()
+                },
+                bubbles: true
+            })
+        );
+    }
+
+    _handleCellDrop(cell, e) {
+        e.currentTarget.dispatchEvent(
+            new CustomEvent('emptyspacedrop', {
+                detail: {
+                    cell: cell,
+                    sourceData: e.dataTransfer.getData('text/plain'),
+                    timestamp: Date.now()
+                },
+                bubbles: true
+            })
+        );
+    }
+
+    _handleCellDragover(cell, e) {
+        return; // no need to emit an event for dragover, just allow dropping
     }
 }
