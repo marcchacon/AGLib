@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AGLib BoardRenderer Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { margin-bottom: 0.3rem; }
+        #board-container {
+            border: 2px solid #444;
+            display: inline-block;
+            margin-bottom: 1rem;
+            background: #f4f4f4;
+        }
+        #event-log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 260px;
+            overflow-y: auto;
+            background: #fafafa;
+            font-size: 13px;
+            font-family: monospace;
+        }
+        button {
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.8rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .info {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        #game-status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <h1>AGLib Neutron Game</h1>
+    <div id="game-status">🎮 Ready to start. Click a piece to see where it can move.</div>
+    <div id="board-container"></div>
+
+    <h2>Event Log</h2>
+    <div id="event-log"></div>
+    <button id="refresh-board">Refresh Board</button>
+    <button id="clear-log">Clear Log</button>
+
+    <script src="Separated%20Classes/Style.js"></script>
+    <script src="Separated%20Classes/Renderer.js"></script>
+    <script src="Separated%20Classes/Piece.js"></script>
+    <script src="Separated%20Classes/BoardPiece.js"></script>
+    <script src="Separated%20Classes/Board.js"></script>
+    <script src="aglib.js"></script>
+    <script src="neutron.js"></script>
+    <script>
+        const eventLog = document.getElementById('event-log');
+        const container = document.getElementById('board-container');
+        const clearLogButton = document.getElementById('clear-log');
+        const gameStatusEl = document.getElementById('game-status');
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.textContent = `[${timestamp}] ${message}`;
+            eventLog.appendChild(entry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        function updateGameStatus() {
+            if (!window.Neutron || !window.Neutron.board) return;
+            
+            const game = window.Neutron;
+            const currentPlayer = game.turn[0];
+            
+            if (game.win) {
+                gameStatusEl.textContent = '🏆 Game Over!';
+                gameStatusEl.style.background = '#fff3cd';
+                gameStatusEl.style.borderLeftColor = '#ffc107';
+            } else {
+                switch (currentPlayer) {
+                    case 'CO':
+                        gameStatusEl.style.background = '#e8ffe8';
+                        gameStatusEl.style.borderLeftColor = '#00af00';
+                        gameStatusEl.textContent = `🎮 ${game.turn[1]}\'s Common Piece turn. Click or drag the common piece to see valid moves.`;
+                        break;
+                    case 'P1':
+                        gameStatusEl.style.background = '#ffe8e8';
+                        gameStatusEl.style.borderLeftColor = '#af0000';
+                        gameStatusEl.textContent = `🎮 Player ${currentPlayer}'s turn. Click or drag a piece to see valid moves.`;
+                        break;
+                    case 'P2':
+                        gameStatusEl.style.background = '#e8e8ff';
+                        gameStatusEl.style.borderLeftColor = '#0000af';
+                        gameStatusEl.textContent = `🎮 Player ${currentPlayer}'s turn. Click or drag a piece to see valid moves.`;
+                        break;
+                    default:
+                        gameStatusEl.style.background = '#e3f2fd';
+                        gameStatusEl.style.borderLeftColor = '#2196f3';
+                        gameStatusEl.textContent = `🎮 Player ${currentPlayer}'s turn. Click or drag a piece to see valid moves.`;
+                }
+
+            }
+        }
+
+        clearLogButton.addEventListener('click', () => {
+            eventLog.innerHTML = '';
+        });
+
+        const board = initNeutron();
+
+        container.appendChild(board.el);
+
+        const refreshButton = document.getElementById('refresh-board');
+        refreshButton.addEventListener('click', refreshBoard);
+
+        function refreshBoard() {
+            board.refresh();
+            updateGameStatus();
+        }
+
+        let dragSource = null;
+
+        document.addEventListener('piececlick', (e) => {
+            addLog(`piececlick: ${e.detail.piece.id} (player ${e.detail.piece.player})`);
+        }, true);
+
+        document.addEventListener('boardpiececlick', (e) => {
+            addLog(`boardpiececlick: ${e.detail.boardPiece.id} empty=${e.detail.boardPiece.isEmpty()}`);
+        }, true);
+
+        document.addEventListener('piecedragstart', (e) => {
+            dragSource = e.detail.piece;
+            addLog(`piecedragstart: ${e.detail.piece.id}`);
+        }, true);
+
+        document.addEventListener('piecedragend', (e) => {
+            addLog(`piecedragend: ${e.detail.piece.id} cancelled=${e.detail.cancelled}`);
+            dragSource = null;
+        }, true);
+
+        document.addEventListener('neutronmove', (e) => {
+            const { piece, from, to } = e.detail;
+            addLog(`Neutron move: ${piece.id} from [${from}] to [${to}]`);
+            updateGameStatus();
+        }, true);
+
+        document.addEventListener('boardpiecedrop', (e) => {
+            addLog(`boardpiecedrop: ${e.detail.boardPiece.id}`);
+            // Neutron is listening for boardpiecedrop and will validate/move if allowed
+            dragSource = null;
+        }, true);
+
+        addLog('Demo ready. Click pieces or drag to move. Common piece wins by reaching top or bottom row.');
+        updateGameStatus();
+
+    </script>
+</body>
+</html>
