@@ -464,6 +464,10 @@ class BoardRenderer extends Renderer {
         this.refresh();
     }
 
+    get border() {
+        return this._border;
+    }
+
     clearEmptyHighlights() {
         for (const row of this._cells) {
             for (const cell of row) {

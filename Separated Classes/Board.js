@@ -27,7 +27,7 @@ class Board {
                         this._board.set(this.posKey(pos), bp);
                     } else if (bp) {
                         const pos = [j, i];
-                        this._board.set(this.posKey(pos), new BoardPiece({ id: 'bp_' + this._board.size, style: this._BPstyle  || new BasicStyle() }));
+                        this._board.set(this.posKey(pos), new BoardPiece({ id: 'bp_' + this._board.size, style: this._BPstyle || new BasicStyle() }));
                     }
                 }
             }
@@ -44,14 +44,26 @@ class Board {
         }
     }
 
+    /**
+     * Returns the DOM element representing the board, which is managed by the BoardRenderer.
+      * @returns {HTMLElement} the DOM element representing the board
+      * @example const board = new Board({ x: 3, y: 3 }); document.body.appendChild(board.el); // creates a 3x3 board and appends it to the document body
+     */
     get el() {
         return this._renderer.el;
     }
 
+    /**
+     * Refreshes the board display. This is called internally whenever the board state changes.
+     * If changes are made to the board state outside of the provided methods, this method should be called manually to update the display.
+     */
     refresh() {
         this._renderer.refresh();
     }
 
+    /**
+     * Returns the internal board representation, which is a Map of position keys to BoardPieces.
+     */
     get board() {
         return this._board;
     }
@@ -213,6 +225,7 @@ class Board {
         if (!bp || !bp.piece) return false;
         return bp.removePiece();
     }
+
     /**
      * 
      * @param {Array<Number>} position the position to check for a piece. Expected format: [x, y] 
@@ -299,6 +312,7 @@ class Board {
 
         return null;
     }
+
     /**
      * Converts the internal board representation (a Map of position keys to BoardPieces) into a 2D array (matrix) format
      * @returns {Array<Array<BoardPiece>>} a 2D array representing the board, where each element is a BoardPiece or null.
@@ -357,11 +371,15 @@ class Board {
     /**
      * Returns the relative position based on the current board layout, given an absolute position.
      * @param {Array<Number>} pos the absolute position to check. Expected format: [x, y] 
-     * @param {Number} border the border size for the matrix, default is 1 (i.e., the matrix will have a border of 1 empty cell around the actual board pieces)
+     * @param {Number} border the border size for the matrix, default is whatever the renderer's border is
      * @returns {Array<Number>|null} the position in matrix coordinates, or null if the position is out of bounds
      * @example board.absToRelativePos([-1, -1]) // returns the position of [1, 1], asuming it's the top-left corner of the board.
      */
-    absoluteToRelativePosition(pos, border = 1) {
+    absoluteToRelativePosition(pos, border = null) {
+
+        if (border === null) {
+            border = this._renderer.border || 1;
+        }
 
         const bounds = this.getBounds();
 
@@ -374,12 +392,16 @@ class Board {
     }
 
     /**
-     * 
+     * Returns the absolute position on the board based on the current board layout, given a relative position in matrix coordinates.
      * @param {Array<Number>} pos the relative position in matrix coordinates to convert to absolute board coordinates. 
-     * @param {Number} border the border size for the matrix, default is 1 (i.e., the matrix will have a border of 1 empty cell around the actual board pieces)
+     * @param {Number} border the border size for the matrix, default is whatever the renderer's border is
      * @returns {Array<Number>|null} the absolute position on the board.
      */
-    relativeToAbsolutePosition(pos, border = 1) {
+    relativeToAbsolutePosition(pos, border = null) {
+
+        if (border === null) {
+            border = this._renderer.border || 1;
+        }
 
         const bounds = this.getBounds();
 
@@ -493,6 +515,10 @@ class Board {
         return result;
     }
 
+    /**
+     * Removes all highlights from the board pieces and empty cells. 
+     * This should be called before applying new highlights to ensure that only the desired cells are highlighted at any given time.
+     */
     clearHighlights() {
         for (const bp of this._board.values()) {
             bp.highlighted = false;
@@ -500,6 +526,10 @@ class Board {
         this._renderer.clearEmptyHighlights();
     }
 
+    /**
+     * Highlights an empty cell at the specified position.
+     * @param {Array<Number>} position the absolute position to highlight. Expected format: [x, y]
+     */
     highlightEmptyCell(position) {
         const relpos = this.absoluteToRelativePosition(position, this._renderer.border);
         this._renderer.highlightEmptyCell(relpos);
@@ -580,22 +610,22 @@ class Board {
      * @param {Boolean} diagonal whether to consider diagonal neighbors as connected
      * @returns {Boolean} true if the board is fully connected
      */
-    isBoardConnected({diagonal = false} = {}) {
+    isBoardConnected({ diagonal = false } = {}) {
         return this.countConnectedComponents({ diagonal }) <= 1;
     }
 
     /**
-     * 
+     * Counts the number of isolated groups in the board.
      * @param {Boolean} diagonal whether to consider diagonal neighbors as connected
      * @returns {Number} the number of isolated groups of BoardPieces on the board
      */
-    countConnectedComponents({diagonal = false} = {}) {
+    countConnectedComponents({ diagonal = false } = {}) {
         return this.getConnectedComponents({ diagonal }).length;
     }
 
     /**
-     * 
-     * @param {Array<Number>} position 
+     * Checks if removing the BoardPiece at the given position would result in a disconnected board.
+     * @param {Array<Number>} position the position of the BoardPiece to check. Expected format: [x, y]
      * @param {Boolean} diagonal whether to consider diagonal neighbors as connected 
      * @returns {Boolean} true if removing the BoardPiece at the given position would result in a disconnected board
      */
@@ -612,7 +642,7 @@ class Board {
         // remove temporarily
         this._board.delete(key);
 
-        const disconnected = !this.isBoardConnected({diagonal});
+        const disconnected = !this.isBoardConnected({ diagonal });
 
         // restore
         this._board.set(key, bp);
