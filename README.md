@@ -127,8 +127,8 @@ const redSquareStyle = new AGLib.BasicStyle({color: "red", size: 80});
 const greenCircleStyle = new AGLib.BasicStyle({color: "green", size: 90, shape: 0});
 
 //Formes complexes:
-const blueTriangleStyle = new AGLib.PolygonStyle({color: "blue", size: 100, sides: 3});
-const yellowHexagonStyle = new AGLib.PolygonStyle({color: "yellow", sides: 6});
+const blueTriangleStyle = new AGLib.PolygonStyle({color: "blue", size: 100, shape: 3});
+const yellowHexagonStyle = new AGLib.PolygonStyle({color: "yellow", shape: 6});
 
 board.addPiece(new AGLib.Piece({style: redSquareStyle}), [0, 0]);
 board.addPiece(new AGLib.Piece({style: greenCircleStyle}), [1, 1]);

@@ -38,8 +38,8 @@ class PolygonStyle extends Style {
      * Default values are provided for convenience.
      * @example new PolygonStyle({ color: 'blue', shape: 3, size: 32 }) // Blue triangle of size 32px
      */
-    constructor({ color = 'red', sides = 1, size = 90, opacity = 1 } = {}) {
-        super({color: color, shape: sides, size: size, opacity: opacity});
+    constructor({ color = 'red', shape = 1, size = 90, opacity = 1 } = {}) {
+        super({color: color, shape: shape, size: size, opacity: opacity});
     }
  
     applyTo(el) {
