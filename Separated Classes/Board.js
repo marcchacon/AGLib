@@ -27,7 +27,7 @@ class Board {
                         this._board.set(this.posKey(pos), bp);
                     } else if (bp) {
                         const pos = [j, i];
-                        this._board.set(this.posKey(pos), new BoardPiece({ id: 'bp_' + this._board.size, style: style || new BasicStyle() }));
+                        this._board.set(this.posKey(pos), new BoardPiece({ id: 'bp_' + this._board.size, style: this._BPstyle  || new BasicStyle() }));
                     }
                 }
             }
@@ -87,6 +87,8 @@ class Board {
             boardPiece = new BoardPiece({ id: 'bp_' + this._board.size, style: this._BPstyle });
         }
         this._board.set(key, boardPiece);
+
+        this.refresh();
         return true;
     }
 
@@ -112,6 +114,7 @@ class Board {
             this.addBoardPiece(bp, oldPos);
             return false;
         }
+
         this.refresh();
         return true;
     }
@@ -123,6 +126,8 @@ class Board {
      */
     removeBoardPiece(position) {
         const key = this.posKey(position);
+
+        this.refresh();
         return this._board.delete(key);
     }
 

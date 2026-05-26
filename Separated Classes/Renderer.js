@@ -438,7 +438,7 @@ class BoardRenderer extends Renderer {
 
         super(board);
 
-        this.border = border;
+        this._border = border;
         this.gap = gap;
         this.background = background;
 
@@ -457,6 +457,11 @@ class BoardRenderer extends Renderer {
          }
 
         this._cells = [];
+    }
+
+    set border(value) {
+        this._border = value;
+        this.refresh();
     }
 
     clearEmptyHighlights() {
@@ -502,7 +507,7 @@ class BoardRenderer extends Renderer {
 
         if (!this._el) this._createEl();
 
-        const matrix = this.model.toMatrix(this.border);
+        const matrix = this.model.toMatrix(this._border);
         if (!matrix || matrix.length === 0) {
             this._el.innerHTML = '';
             this._cells = [];
@@ -535,8 +540,8 @@ class BoardRenderer extends Renderer {
                 cell.style.width = `${cellSize}px`;
                 cell.style.height = `${cellSize}px`;
                 // map matrix indices to absolute board coordinates
-                const absX = x + this._minX - this.border;
-                const absY = y + this._minY - this.border;
+                const absX = x + this._minX - this._border;
+                const absY = y + this._minY - this._border;
                 cell.dataset.posAbs = `${absX},${absY}`;
                 const boardPiece = matrix[y][x];
                 this._syncCell(cell, boardPiece);
