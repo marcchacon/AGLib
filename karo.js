@@ -150,7 +150,7 @@
                     if (this.selectedPiece.flipped) {
                         this.selectedPiece.style = this.selectedPiece.player === 'P1' ? Player1FlippedStyle : Player2FlippedStyle;
                     } else {
-                        this.selectedPiece.style = this.selectedPiece.player === 'P1' ? Player1Style : Player2Style;
+                        this.selectedPiece.style = this.selectedPiece.player === 'P1' ? Player1BaseStyle : Player2BaseStyle;
                     }
                 }
 
