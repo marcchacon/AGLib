@@ -112,17 +112,8 @@
             eventLog.innerHTML = '';
         });
 
-        const board = new AGLib.Board();
+        const board = initNeutron();
 
-        const redBoardPieceStyle = new AGLib.BasicStyle({ color: '#f00' });
-        const bp = new AGLib.BoardPiece({ id: 'red', style: redBoardPieceStyle.clone() });
-
-        board.addBoardPiece(bp, [-1, -1]);
-
-const greenBoardPieceStyle = new AGLib.BasicStyle({ color: '#0f0' });
-const bp_green = new AGLib.BoardPiece({ id: 'green', style: greenBoardPieceStyle.clone() });
-
-board.addBoardPiece(bp_green, [2, 1]);
         container.appendChild(board.el);
 
         const refreshButton = document.getElementById('refresh-board');

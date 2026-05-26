@@ -15,9 +15,12 @@ Aquesta llibreria conté les funcions necessàries per crear jocs de taula bidim
 
 ## Exemple d'us
 
+A continuació es troben diferents exemples d'us:
+
+### Creació de tauler
 Per inicialitzar el tauler es pot fer servir el constructor de tres maneres diferents:
 
-### Donant una mida inicial
+#### Donant una mida inicial
 
 Donant els valors x,y es crea un tauler rectangular:
 
@@ -30,11 +33,9 @@ El codi anterior retorna un div HTML que conté el tauler. El tauler té un marg
 
 ![board](images/5x5board.png)
 
+#### Donant una matriu de caselles
 
-### Donant una matriu de caselles
-
-Es pot donar una matriu tant de caselles ja definides com de valors no nuls.
-
+Es pot donar una matriu tant de caselles ja definides com de valors no nuls. Igual que a l'exemple anterior, les caselles tenen un estil per defecte: `BasicStyle({ color = '#bbb', shape = 1, size = 100, opacity = 1 })`
 ```js
 const blackBoardPieceStyle = new AGLib.BasicStyle({ color: '#000' });
 const bp = new AGLib.BoardPiece({ id: 'black', style: blackBoardPieceStyle.clone() });
@@ -56,7 +57,7 @@ Aquest codi crea un taulell de 6x7, sense marge, pero amb espais buits a la part
 
 ![board](images/matrixBoard.png)
 
-### Crear un tauler buit i afegir les caselles
+#### Crear un tauler buit i afegir les caselles
 
 Finalment, es pot crear un tauler buit i anar afegint les caselles que es volen. La posició de les caselles es absoluta, mentre que el que el tauler que apareix en pantalla es relatiu. Crear una casella en la posició [-1,-1] la deixara centrada en el tauler si es la unica casella que existeix. Això es pot veure en el codi:
 
@@ -84,3 +85,66 @@ El tauler queda:
 
 ![board](images/greenRedBoard.png)
 
+### Modificació del tauler
+
+Per moure caselles es pot fer servir `board.moveBoardPiece(oldPos, newPos)`, on `oldPos` es la posició absoluta de la casella que es vol moure, i `newPos` es la posició absoluta on es vol posar la casella. Per exemple, per moure la casella de l'exemple anterior al centre de coordenades s'ha de fer:
+```js
+board.moveBoardPiece([-1, -1], [0, 0]);
+```
+Encara que visualment estigui a `[0,0]`. 
+
+![board](images/redGreenBoard2.png)
+
+També es pot resaltar una casella:
+```js
+const board = new AGLib.Board({ x: 5, y: 5 });
+
+//Agafem la casella de la part superior esquerra
+const bp = board.getBoardPieceAt([0,0])
+
+bp.highlighted = true;
+```
+
+El tauler queda:
+
+![board](images/highlightedBoardPiece.png)
+
+L'estil de resaltat es pot personalitzar modificant `bp.highlightedStyle`. Per netajar el resaltat es pot fer `bp.highlighted = false;`. Es poden netejar tots els resaltats amb `board.clearHighlights()`.
+
+Es pot modificar l'estil base modificant `bp.style`.
+
+Per ultim, es pot eliminar una casella amb `board.removeBoardPiece(pos)`.
+
+### Gestió de peces
+
+El funcionament de les peces es similar al de les caselles. Un cop definit el tauler, es poden afegir les peces. Les peces fan servir les mateixes classes que les caselles pel disseny:
+
+```js
+const board = new AGLib.Board({ x: 5, y: 5 });
+
+//Formes basiques:
+const redSquareStyle = new AGLib.BasicStyle({color: "red", size: 80});
+const greenCircleStyle = new AGLib.BasicStyle({color: "green", size: 90, shape: 0});
+
+//Formes complexes:
+const blueTriangleStyle = new AGLib.PolygonStyle({color: "blue", size: 100, sides: 3});
+const yellowHexagonStyle = new AGLib.PolygonStyle({color: "yellow", sides: 6});
+
+board.addPiece(new AGLib.Piece({style: redSquareStyle}), [0, 0]);
+board.addPiece(new AGLib.Piece({style: greenCircleStyle}), [1, 1]);
+board.addPiece(new AGLib.Piece({style: blueTriangleStyle}), [2, 2]);
+board.addPiece(new AGLib.Piece({style: yellowHexagonStyle}), [3, 3]);
+```
+
+Les peces es veuen de la seguent manera:
+
+![board](images/multiplePieceShape.png)
+
+Per moure les peces es fa servir `board.movePiece(oldPos, newPos, createBP)`, on oldPos i newPos actuen igual que a moveBoardPiece, pero es pot triar si en cas que newPos sigui un espai buit, es crei automaticament una casella. En cas que sigui fals i newPos sigui un espai buit, retorna false, indicant que el moviment no s'ha pogut dur a terme.
+
+Per eliminar una peça, es fa servir `board.removePiece(pos)`. Alternativament, si es te l'objecte de la BoardPiece on esta la peça, es pot cridar directament mitjançant `bp.removePiece()`.
+
+
+### Gestió d'events.
+
+TODO

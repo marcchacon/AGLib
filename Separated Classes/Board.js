@@ -126,6 +126,7 @@ class Board {
      */
     removeBoardPiece(position) {
         const key = this.posKey(position);
+        if (!this._board.has(key)) return false;
 
         this.refresh();
         return this._board.delete(key);
@@ -201,6 +202,17 @@ class Board {
         return true;
     }
 
+    /**
+     * Removes a piece from the board at the specified position.
+     * @param {Array<Number>} position the position of the piece to remove. Expected format: [x, y]
+     * @returns {boolean} true if the piece was removed, false otherwise
+     */
+    removePiece(position) {
+        const key = this.posKey(position);
+        const bp = this._board.get(key);
+        if (!bp || !bp.piece) return false;
+        return bp.removePiece();
+    }
     /**
      * 
      * @param {Array<Number>} position the position to check for a piece. Expected format: [x, y] 
