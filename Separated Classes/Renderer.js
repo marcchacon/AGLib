@@ -432,7 +432,8 @@ class BoardRenderer extends Renderer {
         border = 1,
         gap = 6,
         background = 'white',
-        cellStyle = new BasicStyle({ color: 'transparent', size: 100 })
+        cellStyle,
+        highlightedCellStyle,
     } = {}) {
 
         super(board);
@@ -443,12 +444,36 @@ class BoardRenderer extends Renderer {
 
         if (!(cellStyle instanceof Style)) {
             //throw new Error('cellStyle must be a Style instance (BasicStyle, PolygonStyle, etc.)');
-            new BasicStyle({ color: 'transparent', size: 100 })
+            this.cellStyle = new BasicStyle({ color: 'transparent', size: 100 })
         } else {
             this.cellStyle = cellStyle;
         }
 
+        if (!(highlightedCellStyle instanceof Style)) {
+            //throw new Error('highlightedCellStyle must be a Style instance (BasicStyle, PolygonStyle, etc.)');
+            this.highlightedCellStyle = new BasicStyle({ color: 'lightgreen', size: 100 });
+        } else {
+            this.highlightedCellStyle = highlightedCellStyle;
+         }
+
         this._cells = [];
+    }
+
+    clearEmptyHighlights() {
+        for (const row of this._cells) {
+            for (const cell of row) {
+                if (cell.dataset.highlighted === 'true') {
+                    cell.dataset.highlighted = 'false';
+                    this.cellStyle.applyTo(cell);
+                }
+            }
+         }
+    }
+
+    highlightEmptyCell(position) {
+        const cell = this._cells[position[1]][position[0]];
+        cell.dataset.highlighted = 'true';
+        this.highlightedCellStyle.applyTo(cell);
     }
 
     get el() {
@@ -598,22 +623,32 @@ class BoardRenderer extends Renderer {
     }
 
     _syncCell(cell, boardPiece) {
-        const desiredChild = boardPiece?.el || null;
+
+        const hasPiece = !!boardPiece?.el;
+
         const currentChild = cell.firstElementChild;
 
-        if (currentChild === desiredChild) {
+        if (hasPiece) {
+
+            if (currentChild !== boardPiece.el) {
+
+                if (currentChild) {
+                    cell.removeChild(currentChild);
+                }
+
+                cell.appendChild(boardPiece.el);
+            }
+
+            this._disableCellEvents(cell);
             return;
         }
 
-        if (currentChild && currentChild !== desiredChild) {
+        // empty cell
+        if (currentChild) {
             cell.removeChild(currentChild);
-            this._enableCellEvents(cell);
         }
 
-        if (desiredChild) {
-            cell.appendChild(desiredChild);
-            this._disableCellEvents(cell);
-        }
+        this._enableCellEvents(cell);
     }
 
     _enableCellEvents(cell) {
@@ -641,6 +676,8 @@ class BoardRenderer extends Renderer {
             new CustomEvent('emptyspaceclick', {
                 detail: {
                     cell: cell,
+                    pos: cell.dataset.posAbs.split(',').map(Number),
+                    highlighted: cell.dataset.highlighted === 'true',
                     timestamp: Date.now()
                 },
                 bubbles: true

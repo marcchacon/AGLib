@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AGLib Karo Variant Demo</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+
+        #board-container {
+            border: 2px solid #444;
+            display: inline-block;
+            margin-bottom: 1rem;
+            background: #f4f4f4;
+        }
+
+        #event-log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 260px;
+            overflow-y: auto;
+            background: #fafafa;
+            font-size: 13px;
+            font-family: monospace;
+        }
+
+        #game-status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        button {
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.8rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Karo Variant (AGLib)</h1>
+
+<div id="game-status">Ready.</div>
+<div id="board-container"></div>
+
+<h2>Event Log</h2>
+<div id="event-log"></div>
+
+<button id="clear-log">Clear Log</button>
+<button id="reset">Reset</button>
+
+<script src="Separated Classes/Style.js"></script>
+<script src="Separated Classes/Renderer.js"></script>
+<script src="Separated Classes/Piece.js"></script>
+<script src="Separated Classes/BoardPiece.js"></script>
+<script src="Separated Classes/Board.js"></script>
+<script src="aglib.js"></script>
+<script src="karo.js"></script>
+
+<script>
+const logEl = document.getElementById('event-log');
+const statusEl = document.getElementById('game-status');
+
+function log(msg) {
+    const t = new Date().toLocaleTimeString();
+    const div = document.createElement('div');
+    div.textContent = `[${t}] ${msg}`;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+}
+
+function updateStatus() {
+    if (!window.Karo) return;
+
+    const g = window.Karo;
+
+    if (g.gameOver) {
+        statusEl.textContent = `🏆 Winner: ${g.winner}`;
+        statusEl.style.background = '#fff3cd';
+        statusEl.style.borderLeftColor = '#ffc107';
+        return;
+    }
+
+    statusEl.style.background = '#e3f2fd';
+    statusEl.style.borderLeftColor = '#2196f3';
+
+    if (g.phase === 'placement') {
+        statusEl.textContent =
+            `Placement: ${g.currentPlayer} (${g.counts[g.currentPlayer]}/6)`;
+    } else {
+        statusEl.textContent =
+            `Movement: ${g.currentPlayer} | step: ${g.moveStep}`;
+    }
+}
+
+// refrescar la UI cada vez que el juego avisa de un cambio
+document.addEventListener('karomove', updateStatus);
+
+// ------------------------
+// LOG EVENTS FROM BOARD
+// ------------------------
+
+document.addEventListener('boardpiececlick', e => {
+    const bp = e.detail.boardPiece;
+    log(`boardpiececlick id=${bp.id} empty=${bp.isEmpty()}`);
+});
+
+document.addEventListener('emptyspaceclick', e => {
+    const cell = e.detail.cell;
+    log(`emptyspaceclick pos=${cell.dataset?.posAbs || 'unknown'}`);
+});
+
+document.addEventListener('boardpiecedrop', e => {
+    log(`boardpiecedrop id=${e.detail.boardPiece.id}`);
+});
+
+document.getElementById('clear-log').onclick = () => {
+    logEl.innerHTML = '';
+};
+
+document.getElementById('reset').onclick = () => {
+    if (window.Karo?.reset) window.Karo.reset();
+    log('RESET');
+    updateStatus();
+};
+
+document.addEventListener('karomove', updateStatus);
+
+// INIT BOARD
+const board = initKaro();
+document.getElementById('board-container').appendChild(board.el);
+
+updateStatus();
+log('Karo ready.');
+</script>
+
+</body>
+</html>
