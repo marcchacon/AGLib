@@ -54,6 +54,9 @@
             document.addEventListener('piececlick', (e) => this._onPieceSelected(e));
             document.addEventListener('piecedragstart', (e) => this._onPieceSelected(e));
             document.addEventListener('boardpiececlick', (e) => this._onBoardPieceClick(e));
+            document.addEventListener('boardpiecedrop', (e) => this._onBoardPieceClick(e));
+            document.addEventListener('boardpiecedragstart', (e) => this._onBoardPieceClick(e));
+
         },
 
         reset() {
@@ -135,12 +138,12 @@
                 return;
             } else if (this.moveStep === 'piece') {
                 if (!bp.highlighted) return;
-                
+
                 const curPos = this.board.getPositionOf(this.selectedPiece.boardPiece);
-                
+
                 const moved = this.board.movePiece(curPos, pos, false);
                 if (!moved) return;
-                
+
                 const isJump = this._isJumpMove(curPos, pos);
                 if (isJump) {
                     this.selectedPiece.flipped = !this.selectedPiece.flipped;
@@ -155,6 +158,9 @@
                 this.board.clearHighlights();
 
                 this.winnerCheck();
+
+                this.addDraggableBoardPieces();
+                this.removeDragablePieces();
 
                 this.moveStep = 'boardpiece';
                 document.dispatchEvent(new CustomEvent('karomove', { detail: { type: 'move', step: 'boardpiece' } }));
@@ -174,6 +180,8 @@
                     if (neighbors.size > 0) {
                         this.board.highlightEmptyCell(blankPos);
                         this.board.el.addEventListener('emptyspaceclick', (e) => this._onCellClick(e));
+                        this.board.el.addEventListener('emptyspacedrop', (e) => this._onCellClick(e));
+
                     }
                 });
             }
@@ -198,6 +206,7 @@
                 this.board.clearHighlights();
 
                 this.board.el.removeEventListener('emptyspaceclick', (e) => this._onCellClick(e));
+                this.board.el.removeEventListener('emptyspacedrop', (e) => this._onCellClick(e));
 
                 this._endPlayerTurn();
             }
@@ -225,10 +234,10 @@
 
             // switch player
             this.currentPlayer = this.currentPlayer === players[0] ? players[1] : players[0];
-            // clear lock if lock belonged to the player now to move (returning to owner means lock expired)
-            if (this.lockedBy && this.lockedBy === this.currentPlayer) {
-                this.lockedBoardPieceKey = null; this.lockedBy = null;
-            }
+
+            this.addDragablePieces();
+            this.removeDraggableBoardPieces();
+
             document.dispatchEvent(new CustomEvent('karomove', { detail: { type: 'turn', player: this.currentPlayer } }));
         },
 
@@ -244,7 +253,7 @@
             if (!bp.isEmpty()) return false;
 
             // must have at least two orthogonal free sides (no BoardPiece present)
-            let free = 4 - this.board.getNeighbors(pos, {diagonal: false}).length;
+            let free = 4 - this.board.getNeighbors(pos, { diagonal: false }).length;
             if (free < 2) return false;
 
             // not allowed if removing splits board
@@ -287,6 +296,50 @@
             }
 
             return false;
+        },
+
+        removeDragablePieces() {
+            for (const piece of this.board.piecesPlaced()) {
+                piece.draggable = false;
+            }
+
+            document.removeEventListener('piececlick', (e) => this._onPieceSelected(e));
+            document.removeEventListener('piecedragstart', (e) => this._onPieceSelected(e));
+            document.removeEventListener('boardpiecedrop', (e) => this._onBoardPieceClick(e));
+
+        },
+
+        addDragablePieces() {
+            for (const piece of this.board.piecesPlaced()) {
+                piece.draggable = true;
+            }
+
+            document.addEventListener('piececlick', (e) => this._onPieceSelected(e));
+            document.addEventListener('piecedragstart', (e) => this._onPieceSelected(e));
+            document.addEventListener('boardpiecedrop', (e) => this._onBoardPieceClick(e));
+
+        },
+
+        removeDraggableBoardPieces() {
+            for (const bp of this.board.board.values()) {
+                bp.draggable = false;
+            }
+
+            document.removeEventListener('boardpiececlick', (e) => this._onBoardPieceClick(e));
+            document.removeEventListener('emptyspaceclick', (e) => this._onCellClick(e));
+            document.removeEventListener('boardpiecedragstart', (e) => this._onBoardPieceClick(e));
+            document.removeEventListener('emptyspacedrop', (e) => this._onCellClick(e));
+        },
+
+        addDraggableBoardPieces() {
+            for (const bp of this.board.board.values()) {
+                bp.draggable = true;
+            }
+
+            document.addEventListener('boardpiececlick', (e) => this._onBoardPieceClick(e));
+            document.addEventListener('emptyspaceclick', (e) => this._onCellClick(e));
+            document.addEventListener('boardpiecedragstart', (e) => this._onBoardPieceClick(e));
+            document.addEventListener('emptyspacedrop', (e) => this._onCellClick(e));
         }
     };
 

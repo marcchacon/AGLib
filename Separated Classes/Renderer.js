@@ -690,6 +690,7 @@ class BoardRenderer extends Renderer {
             new CustomEvent('emptyspacedrop', {
                 detail: {
                     cell: cell,
+                    pos: cell.dataset.posAbs.split(',').map(Number),
                     sourceData: e.dataTransfer.getData('text/plain'),
                     timestamp: Date.now()
                 },
