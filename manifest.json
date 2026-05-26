@@ -1,0 +1,5 @@
+[
+  { "name": "Karo", "file": "karo_aglib.html" },
+  { "name": "Tic tac toe", "file": "tictactoe_aglib.html" },
+  { "name": "Neutron", "file": "neutron_aglib.html" }
+]

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>AGLib Games Hub</title>
+</head>
+
+<body>
+
+<h1>🎮 Games</h1>
+
+<div id="games">Cargando...</div>
+
+<script>
+const container = document.getElementById('games');
+
+async function loadGames() {
+    try {
+        const res = await fetch('manifest.json');
+        const games = await res.json();
+
+        container.innerHTML = '';
+
+        games.forEach(game => {
+            const link = document.createElement('a');
+            link.href = game.file;
+            link.textContent = game.name;
+            link.style.display = 'block';
+            link.style.margin = '8px 0';
+
+            container.appendChild(link);
+        });
+
+    } catch (e) {
+        container.textContent = 'Could not load manifest.json';
+        console.error(e);
+    }
+}
+
+loadGames();
+</script>
+
+</body>
+</html>
