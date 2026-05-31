@@ -252,7 +252,7 @@ class BoardPieceRenderer extends Renderer {
 
         const bp = this.model;
 
-       this._el.style = '';
+        this._el.style = '';
 
         // STYLE SELECTION
         if (this.model.highlighted) {
@@ -417,6 +417,18 @@ class BoardPieceRenderer extends Renderer {
     }
 
     _onDragEnd() {
+
+        e.currentTarget.dispatchEvent(
+            new CustomEvent('boardpiecedragend', {
+                detail: {
+                    boardPiece: this.model,
+                    timestamp: Date.now()
+                },
+                cancelable: true,
+                bubbles: true
+            })
+        );
+
         this.refresh();
     }
 }
@@ -458,7 +470,7 @@ class BoardRenderer extends Renderer {
             this.highlightedCellStyle = new BasicStyle({ color: 'lightgreen', size: 100 });
         } else {
             this.highlightedCellStyle = highlightedCellStyle;
-         }
+        }
 
         this._cells = [];
     }
@@ -480,7 +492,7 @@ class BoardRenderer extends Renderer {
                     this.cellStyle.applyTo(cell);
                 }
             }
-         }
+        }
     }
 
     highlightEmptyCell(position) {
