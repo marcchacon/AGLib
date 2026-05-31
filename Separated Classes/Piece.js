@@ -10,6 +10,7 @@ class Piece {
      */
     constructor({id, player, style, clickable = true} = {}) {
 
+        if (!id) id = Math.random().toString(36).substring(2, 15);
         this.id = id;
         this.player = player;
 

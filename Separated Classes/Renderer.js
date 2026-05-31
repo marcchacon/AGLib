@@ -87,6 +87,8 @@ class PieceRenderer extends Renderer {
 
         if (!this._el) return;
 
+        this._el.style = '';
+
         this.style.applyTo(this._el);
     }
 
@@ -249,6 +251,8 @@ class BoardPieceRenderer extends Renderer {
         if (!this._el) return;
 
         const bp = this.model;
+
+       this._el.style = '';
 
         // STYLE SELECTION
         if (this.model.highlighted) {

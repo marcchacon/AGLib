@@ -67,7 +67,7 @@ const board = new AGLib.Board();
 const redBoardPieceStyle = new AGLib.BasicStyle({ color: '#f00' });
 const bp = new AGLib.BoardPiece({ id: 'red', style: redBoardPieceStyle.clone() });
 
-board.addBoardPiece(bp, [-1, -1]);
+board.addBoardPiece([-1, -1], bp);
 
 const boardHtmlElement = board.el;
 ```
@@ -78,7 +78,7 @@ Si després s'afegeix una altre casella, es mourà tot el tauler:
 const greenBoardPieceStyle = new AGLib.BasicStyle({ color: '#0f0' });
 const bp_green = new AGLib.BoardPiece({ id: 'red', style: greenBoardPieceStyle.clone() });
 
-board.addBoardPiece(bp, [1, 2]);
+board.addBoardPiece([1, 2], bp);
 ```
 
 El tauler queda:

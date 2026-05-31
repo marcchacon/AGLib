@@ -11,7 +11,7 @@ class Board {
      * @param {Array<Array<BoardPiece|null|any>>} matrix Optional 2D array to initialize the board with specific BoardPieces or placeholders (non-null, non-BoardPiece values will be converted to default BoardPieces) 
      * @param {Style} BoardPieceStyle default style for any auto-created BoardPieces )
      */
-    constructor({ x = 0, y = 0, matrix = null, BoardPieceStyle = null, background = null, gap = 6, EmptyCellStyle = null, border = null } = {}) {
+    constructor({ x = 0, y = 0, matrix = null, BoardPieceStyle = null, background = null, gap = 6, EmptyCellStyle = null, border = 1 } = {}) {
 
         this._BPstyle = BoardPieceStyle || new BasicStyle();
         this._renderer = new BoardRenderer(this, { background: background, gap: gap, border: border });
@@ -88,15 +88,15 @@ class Board {
 
     /**
      * Adds a BoardPiece to the board at the specified position.
-     * @param {BoardPiece} boardPiece the BoardPiece to add. if not provided, a default BoardPiece will be created at the position.
      * @param {Array<Number>} position the position to add the BoardPiece at. Expected format: [x, y]
+     * @param {BoardPiece} boardPiece the BoardPiece to add. if not provided, a default BoardPiece will be created at the position.
      * @returns {boolean} true if the BoardPiece was added, false otherwise
      */
-    addBoardPiece(boardPiece = null, position) {
+    addBoardPiece(position, boardPiece = null) {
         const key = this.posKey(position);
         if (this._board.has(key)) return false;
         if (!boardPiece) {
-            boardPiece = new BoardPiece({ id: 'bp_' + this._board.size, style: this._BPstyle });
+            boardPiece = new BoardPiece({ id: 'bp_' + Math.random.toString(), style: this._BPstyle });
         }
         this._board.set(key, boardPiece);
 
@@ -121,9 +121,9 @@ class Board {
             return false;
         }
 
-        if (!this.addBoardPiece(bp, newPos)) {
+        if (!this.addBoardPiece(newPos, bp)) {
             // rollback
-            this.addBoardPiece(bp, oldPos);
+            this.addBoardPiece(oldPos, bp);
             return false;
         }
 
