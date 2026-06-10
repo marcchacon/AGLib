@@ -300,10 +300,22 @@ class Board {
     }
 
     /**
-     * @param {BoardPiece} boardPiece
+     * @param {BoardPiece|Piece} Element to find on the board
      * @returns {Array<number>|null}
      */
-    getPositionOf(boardPiece) {
+    getPositionOf(element) {
+        let boardPiece = null;
+        if (element instanceof Piece) {
+            for (const [key, bp] of this._board.entries()) {
+                if (bp.piece === element) {
+                    boardPiece = bp;
+                    break;
+                }
+            }
+        } else if (element instanceof BoardPiece) {
+            boardPiece = element;
+        }
+
         for (const [key, piece] of this._board.entries()) {
             if (piece === boardPiece) {
                 return this.keyToPos(key);
