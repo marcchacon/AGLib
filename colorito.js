@@ -22,6 +22,7 @@
             document.addEventListener('piececlick', (e) => this._onPieceSelected(e));
             document.addEventListener('piecedragstart', (e) => this._onPieceSelected(e));
             document.addEventListener('piecedragend', (e) => { this.board.clearHighlights(); this.selectedPiece = null; });
+            document.addEventListener('boardpiecedrop', (e) => this._onBoardPieceClick(e));
         },
 
         _onBoardPieceClick(e) {
@@ -63,7 +64,7 @@
                 //                console.log(`Checking neighbor at direction ${dir}:`, neighbor.id);
                 const neighborPos = this.board.keyToPos(dir);
                 if (!neighbor?.isEmpty()) continue; // Can't move if there's a piece in the way
-                if (neighbor.id.includes(piece.id.split('_')[0])) {
+                if (neighbor.id.includes(piece.id.split('_')[0]) || neighbor.id.startsWith('G')) {
                     neighbor.highlighted = true;
                 }
 
@@ -105,7 +106,7 @@
 
                 const jumpTarget = this.board.getBoardPieceAt(jumpPos);
                 if (!jumpTarget || !jumpTarget.isEmpty()) continue;
-                if (jumpTarget.id.includes(color)) {
+                if (jumpTarget.id.includes(color) || jumpTarget.id.startsWith('G')) {
                     jumps.add(jumpPos);
                 }
 
@@ -198,26 +199,40 @@
         //Board Piece styles
         const redStyle = new BasicStyle({ color: "#EC9EA4" })
         const red = new BoardPiece({ id: "red", style: redStyle, clickable: true, draggable: false })
+
+        const redGoalStyle = new BasicStyle({ color: "##f4f4f4", shape: 1, border: 5, borderColor: "#EC9EA4" })
+        const redGoalPiece = new BoardPiece({ id: "G_red", style: redGoalStyle, clickable: true, draggable: false })
+
         const yellowStyle = new BasicStyle({ color: "#F5F3A6" })
         const yellow = new BoardPiece({ id: "yellow", style: yellowStyle, clickable: true, draggable: false })
 
+        const yellowGoalStyle = new BasicStyle({ color: "##f4f4f4", shape: 1, border: 5, borderColor: "#F5F3A6" })
+        const yellowGoalPiece = new BoardPiece({ id: "G_yellow", style: yellowGoalStyle, clickable: true, draggable: false })
+
         const darkBlueStyle = new BasicStyle({ color: "#7ea6f0" })
         const darkBlue = new BoardPiece({ id: "darkBlue", style: darkBlueStyle, clickable: true, draggable: false })
+
+        const darkBlueGoalStyle = new BasicStyle({ color: "##f4f4f4", shape: 1, border: 5, borderColor: "#7ea6f0" })
+        const darkBlueGoalPiece = new BoardPiece({ id: "G_darkBlue", style: darkBlueGoalStyle, clickable: true, draggable: false })
+
         const lightBlueStyle = new BasicStyle({ color: "#cbdbf9" })
         const lightBlue = new BoardPiece({ id: "lightBlue", style: lightBlueStyle, clickable: true, draggable: false })
 
+        const lightBlueGoalStyle = new BasicStyle({ color: "##f4f4f4", shape: 1, border: 5, borderColor: "#cbdbf9" })
+        const lightBlueGoalPiece = new BoardPiece({ id: "G_lightBlue", style: lightBlueGoalStyle, clickable: true, draggable: false })
+
 
         const matrix = [
-            [red.clone(), red.clone(), red.clone(), red.clone(), red.clone(), red.clone(), red.clone(), red.clone(), red.clone(), red.clone()],
-            [yellow.clone(), yellow.clone(), yellow.clone(), yellow.clone(), yellow.clone(), yellow.clone(), yellow.clone(), yellow.clone(), yellow.clone(), yellow.clone()],
+            [redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone(), redGoalPiece.clone()],
+            [yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone(), yellowGoalPiece.clone()],
             [red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone()],
             [darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone()],
             [red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone()],
             [darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone()],
             [red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone()],
             [darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone(), red.clone(), yellow.clone(), darkBlue.clone(), lightBlue.clone()],
-            [lightBlue.clone(), lightBlue.clone(), lightBlue.clone(), lightBlue.clone(), lightBlue.clone(), lightBlue.clone(), lightBlue.clone(), lightBlue.clone(), lightBlue.clone(), lightBlue.clone()],
-            [darkBlue.clone(), darkBlue.clone(), darkBlue.clone(), darkBlue.clone(), darkBlue.clone(), darkBlue.clone(), darkBlue.clone(), darkBlue.clone(), darkBlue.clone(), darkBlue.clone()]
+            [lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone(), lightBlueGoalPiece.clone()],
+            [darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone(), darkBlueGoalPiece.clone()]
         ]
         const board = new Board({ matrix: matrix, border: 0 })
 
