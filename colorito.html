@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AGLib Colorito Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { margin-bottom: 0.3rem; }
+        #board-container {
+            border: 2px solid #444;
+            display: inline-block;
+            margin-bottom: 1rem;
+            background: #f4f4f4;
+        }
+        #event-log {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 260px;
+            overflow-y: auto;
+            background: #fafafa;
+            font-size: 13px;
+            font-family: monospace;
+        }
+        button {
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.8rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .info {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        #game-status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <h1>AGLib Colorito</h1>
+    <div id="game-status">🎮 Ready to play, Player 1 is red and yellow</div>
+    <div id="board-container"></div>
+
+    <h2>Event Log</h2>
+    <div id="event-log"></div>
+    <button id="reset-game">Reset Game</button>
+    <button id="clear-log">Clear Log</button>
+
+    <script src="Separated%20Classes/Style.js"></script>
+    <script src="Separated%20Classes/Renderer.js"></script>
+    <script src="Separated%20Classes/Piece.js"></script>
+    <script src="Separated%20Classes/BoardPiece.js"></script>
+    <script src="Separated%20Classes/Board.js"></script>
+    <script src="aglib.js"></script>
+    <script src="colorito.js"></script>
+    <script>
+        const eventLog = document.getElementById('event-log');
+        const container = document.getElementById('board-container');
+        const clearLogButton = document.getElementById('clear-log');
+        const resetGameButton = document.getElementById('reset-game');
+        const gameStatusEl = document.getElementById('game-status');
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.textContent = `[${timestamp}] ${message}`;
+            eventLog.appendChild(entry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        function updateGameStatus(winner, player) {
+            if (!window.Colorito || !window.Colorito.board) return;
+            const game = window.Colorito;
+
+            if (winner) {
+                gameStatusEl.textContent = `🏆 Player ${game.winner} wins!`;
+                gameStatusEl.style.background = '#c8e6c9';
+                gameStatusEl.style.borderColor = '#4caf50';
+            } else {
+                gameStatusEl.textContent = `🎮 Player ${player}'s turn`;
+                gameStatusEl.style.background = '#e3f2fd';
+                gameStatusEl.style.borderColor = '#2196f3';
+            }
+        }
+
+        clearLogButton.addEventListener('click', () => {
+            eventLog.innerHTML = '';
+        });
+
+        resetGameButton.addEventListener('click', () => {
+            if (window.Colorito && typeof window.Colorito.reset === 'function') {
+                window.Colorito.reset();
+                updateGameStatus();
+                addLog('Game reset. New round started.');
+            }
+        });
+
+        const board = initColorito();
+        container.appendChild(board.el);
+
+        document.addEventListener('boardpiececlick', (e) => {
+            const bp = e.detail && e.detail.boardPiece;
+            if (bp) {
+                const pos = window.Colorito.board.getPositionOf(bp);
+                addLog(`boardpiececlick: ${pos ? pos.join(',') : 'unknown'} empty=${bp.isEmpty()}`);
+            }
+        }, true);
+
+        document.addEventListener('coloritomove', (e) => {
+            updateGameStatus(e.detail.winner, e.detail.player);
+        });
+
+        addLog('TicTacToe demo ready.');
+    </script>
+</body>
+</html>
