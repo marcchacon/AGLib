@@ -1,6 +1,6 @@
 class Style {
 
-    constructor({ color, shape, size, opacity } = {}) {
+    constructor({ color, shape, size, opacity, border = 0, borderColor = "black" } = {}) {
         if (new.target === Style) {
             throw new Error('Style is an abstract class and cannot be instantiated directly');
         }
@@ -8,6 +8,8 @@ class Style {
         this.shape = shape;
         this.size = size;
         this.opacity = opacity;
+        this.border = border;
+        this.borderColor = borderColor;
     }
 
     /**
@@ -38,8 +40,8 @@ class PolygonStyle extends Style {
      * Default values are provided for convenience.
      * @example new PolygonStyle({ color: 'blue', shape: 3, size: 32 }) // Blue triangle of size 32px
      */
-    constructor({ color = 'red', shape = 1, size = 90, opacity = 1 } = {}) {
-        super({color: color, shape: shape, size: size, opacity: opacity});
+    constructor({ color = 'red', shape = 1, size = 90, opacity = 1, border = 0, borderColor = "black" } = {}) {
+        super({color: color, shape: shape, size: size, opacity: opacity, border: border, borderColor: borderColor});
     }
  
     applyTo(el) {
@@ -52,11 +54,14 @@ class PolygonStyle extends Style {
 
         el.style.clipPath = this._polygonPoints(this.shape, this.size);
         el.style.opacity = this.opacity;
+        
+        el.style.boxSizing = 'border-box';
+        el.style.border = this.border > 0 ? `${this.border}px solid ${this.borderColor}` : 'none';
         return true;
     }
 
     clone() {
-        return new PolygonStyle({ color: this.color, shape: this.shape, size: this.size, opacity: this.opacity });
+        return new PolygonStyle({ color: this.color, shape: this.shape, size: this.size, opacity: this.opacity, border: this.border, borderColor: this.borderColor });
     }
 
     /**
@@ -101,8 +106,8 @@ class BasicStyle extends Style {
      * Default values are provided for convenience.
      * @example new BasicStyle({ color: '#bbb', shape: 1, size: 100 }) // Gray square of size 100px
      */
-    constructor({ color = '#bbb', shape = 1, size = 100, opacity = 1 } = {}) {
-        super({color: color, shape: shape, size: size, opacity: opacity});
+    constructor({ color = '#bbb', shape = 1, size = 100, opacity = 1, border = 0, borderColor = "black" } = {}) {
+        super({color: color, shape: shape, size: size, opacity: opacity, border: border, borderColor: borderColor});
     }
 
     applyTo(el) {
@@ -114,10 +119,13 @@ class BasicStyle extends Style {
         el.style.display = 'inline-flex';
         el.style.justifyContent = 'center';
         el.style.alignItems = 'center';
+
+        el.style.boxSizing = 'border-box';
+        el.style.border = this.border > 0 ? `${this.border}px solid ${this.borderColor}` : 'none';
         return true;
     }
 
     clone() {
-        return new BasicStyle({ color: this.color, shape: this.shape, size: this.size, opacity: this.opacity });
+        return new BasicStyle({ color: this.color, shape: this.shape, size: this.size, opacity: this.opacity, border: this.border, borderColor: this.borderColor });
     }
 }
